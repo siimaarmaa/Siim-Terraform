@@ -1,0 +1,8 @@
+
+image: registry.gitlab.com/xa-online-2021-march/builder:latest
+
+provision:
+  stage: deploy
+  script:
+    - terraform init
+    - terraform apply -auto-approve    
