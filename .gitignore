@@ -1,0 +1,8 @@
+*.log
+.terraform
+*.tfstate
+*.backup
+*.lock
+*.pem
+*.crt
+*.key
