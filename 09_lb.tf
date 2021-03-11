@@ -13,7 +13,7 @@ resource "aws_lb_target_group" "cluster_target_group" {
 }
 
 resource "aws_lb_target_group_attachment" "cluster_target" {
-  count            = var.nodes_count
+  count            = var.node_count
   target_group_arn = aws_lb_target_group.cluster_target_group.arn
   target_id        = aws_instance.cluster_node[count.index].id
   port             = 9200
