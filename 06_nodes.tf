@@ -3,7 +3,7 @@ resource "aws_instance" "cluster_node" {
   ami           = data.aws_ami.devops_ubuntu.id
   instance_type = "t2.medium"
   tags = {
-    Name = "${var.project_name}-node-${format("%02d", count.index + 1)}"
+    Name = "siimaarmaa_machine"
   }
   root_block_device {
     volume_size = "10"
@@ -28,3 +28,4 @@ resource "aws_instance" "cluster_node" {
     ]
   }
 }
+
