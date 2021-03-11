@@ -15,7 +15,7 @@ resource "aws_instance" "cluster_node" {
     host        = coalesce(self.public_ip, self.private_ip)
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("siimaarmaaV2.key")
+    private_key = file("siimaarmaa.pem.pub")
   }
   provisioner "remote-exec" {
     inline = [
