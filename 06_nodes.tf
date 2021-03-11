@@ -8,14 +8,14 @@ resource "aws_instance" "cluster_node" {
   root_block_device {
     volume_size = "10"
   }
-  key_name               = aws_key_pair.student_key.key_name
+  key_name               = aws_key_pair.siimaarmaaV2.key_name
   subnet_id              = count.index % 2 == 0 ? data.aws_subnet.workshop_subnet_primary.id : data.aws_subnet.workshop_subnet_secondary.id
   vpc_security_group_ids = [data.aws_security_group.workshop_security_group.id]
   connection {
     host        = coalesce(self.public_ip, self.private_ip)
     type        = "ssh"
     user        = "ubuntu"
-    private_key = file("student.key")
+    private_key = file("siimaarmaaV2.key")
   }
   provisioner "remote-exec" {
     inline = [
