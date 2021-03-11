@@ -1,12 +1,12 @@
 resource "aws_lb" "cluster_lb" {
   name            = "siimaarmaa_machine-lb"
   internal        = false
-  security_groups = [ data.aws_security_group.workshop_secunity_group.id ]
+  security_groups = [ data.aws_security_group.workshop_secondary_group.id ]
   subnets         = [ data.aws_subnet.workshop_subnet_primary.id, data.aws_subnet.workshop_subnet_secondary.id ]
 }
 
 resource "aws_lb_target_group" "cluster_target_group" {
-  name     = "siimaarmaa_machine_elasticsearch"
+  name     = "siimaarmaamachineelasticsearch"
   port     = 9200
   protocol = "HTTP"
   vpc_id   = data.aws_subnet.workshop_subnet_primary.vpc_id
