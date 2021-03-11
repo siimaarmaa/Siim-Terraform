@@ -1,5 +1,5 @@
 resource "aws_lb" "cluster_lb" {
-  name            = "siimaarmaa_machine-lb"
+  name            = "siimaarmaamachinelb"
   internal        = false
   security_groups = [ data.aws_security_group.workshop_security_group.id ]
   subnets         = [ data.aws_subnet.workshop_subnet_primary.id, data.aws_subnet.workshop_subnet_secondary.id ]
