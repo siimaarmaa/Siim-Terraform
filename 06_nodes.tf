@@ -25,6 +25,7 @@ resource "aws_instance" "cluster_node" {
       "echo 'deb https://artifacts.elastic.co/packages/7.x/apt stable main' | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list",
       "sudo apt-get update && sudo apt-get install elasticsearch",
       "sudo chown -R elasticsearch:elasticsearch /usr/share/elasticsearch",
+      "sudo service elasticsearach start",
     ]
   }
 }
