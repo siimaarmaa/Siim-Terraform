@@ -1,3 +1,3 @@
 variable "node_count" {
-  defaultie = "2"
+  default = "2"
 }
