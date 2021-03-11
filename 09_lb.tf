@@ -6,7 +6,7 @@ resource "aws_lb" "cluster_lb" {
 }
 
 resource "aws_lb_target_group" "cluster_target_group" {
-  name     = "siimaarmaa_machine-elasticsearch"
+  name     = "siimaarmaa_machine_elasticsearch"
   port     = 9200
   protocol = "HTTP"
   vpc_id   = data.aws_subnet.workshop_subnet_primary.vpc_id
