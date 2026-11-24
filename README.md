@@ -1,45 +1,45 @@
 # Siim-Terraform
 
-Terraform projekt, mis ehitab AWS-i (`eu-west-1`) Elasticsearch'i serverid koos load balanceriga.
+Terraform project that builds Elasticsearch servers with a load balancer in AWS (`eu-west-1`).
 
-## Mida projekt loob
+## What the project creates
 
-- **1 eraldiseisev server** `siimaarmaa_machine` (Ubuntu, `t2.medium`, 10 GB ketas)
-- **Klastri serverid** `cluster_node` (vaikimisi 2 tk, `t2.medium`, 10 GB ketas), mis jaotatakse kahe subneti vahel. Igale serverile paigaldatakse SSH kaudu (`remote-exec`) Elasticsearch 7.x
-- **SSH võtmepaar** `siimaarmaaV2` AWS-is (avalik võti failist `siimaarmaa.pem.pub`)
-- **Application Load Balancer** `siimaarmaamachinelb`, mis suunab pordi 9200 liikluse klastri serveritele (target group + listener + attachmentid)
-- **TLS võti** `siimaarmaa_key1` ja sellest tehtud AWS-i võtmepaar `siimaarmaa_key1`
+- **1 standalone server** `siimaarmaa_machine` (Ubuntu, `t2.medium`, 10 GB disk)
+- **Cluster servers** `cluster_node` (2 by default, `t2.medium`, 10 GB disk), spread across two subnets. Elasticsearch 7.x is installed on each server over SSH (`remote-exec`)
+- **SSH key pair** `siimaarmaaV2` in AWS (public key from `siimaarmaa.pem.pub`)
+- **Application Load Balancer** `siimaarmaamachinelb`, forwarding port 9200 traffic to the cluster servers (target group + listener + attachments)
+- **TLS key** `siimaarmaa_key1` and an AWS key pair `siimaarmaa_key1` created from it
 
-## Failide ülevaade
+## File overview
 
-| Fail | Sisu |
+| File | Contents |
 |---|---|
 | `01_provider.tf` | AWS provider, region `eu-west-1` |
 | `01_terraform.tf` | `local` provider |
-| `02_query.tf` | Olemasolevate ressursside päring: AMI (`devops-ubuntu-18-04-x64*`), subnet, security group `workshop_security` |
+| `02_query.tf` | Lookups of existing resources: AMI (`devops-ubuntu-18-04-x64*`), subnet, security group `workshop_security` |
 | `03_keypair.tf` | AWS key pair `siimaarmaaV2` |
-| `04_instance.tf` | Eraldiseisev server `siimaarmaa_machine` |
-| `05_tls.tf` | `tls_private_key` ja sellest tehtud key pair |
-| `06_nodes.tf` | Klastri serverid + Elasticsearch'i paigaldus |
-| `07_sunet.tf` | Kaks subneti (`10.1.101.0/24` ja `10.1.102.0/24`) |
-| `08_node_count.tf` | Muutuja `node_count` (vaikimisi `2`) |
+| `04_instance.tf` | Standalone server `siimaarmaa_machine` |
+| `05_tls.tf` | `tls_private_key` and the key pair created from it |
+| `06_nodes.tf` | Cluster servers + Elasticsearch installation |
+| `07_sunet.tf` | Two subnets (`10.1.101.0/24` and `10.1.102.0/24`) |
+| `08_node_count.tf` | Variable `node_count` (default `2`) |
 | `09_lb.tf` | Load balancer, target group, listener, `lb_dns` output |
-| `99_output.tf` | Outputid `ami_id` ja `ip` |
+| `99_output.tf` | Outputs `ami_id` and `ip` |
 | `terraform.tf` | Remote state: S3 bucket `xa-online-2021-march`, key `siimaarmaa` |
-| `.gitlab-ci.yml` | GitLab pipeline: `terraform init` ja `terraform apply -auto-approve` |
+| `.gitlab-ci.yml` | GitLab pipeline: `terraform init` and `terraform apply -auto-approve` |
 
-## Eeldused
+## Prerequisites
 
-- Terraform ja AWS-i ligipääs (access key / secret key keskkonnamuutujatena)
-- Ligipääs S3 bucketile `xa-online-2021-march` (state)
-- AWS-is olemas: AMI `devops-ubuntu-18-04-x64*` (omaniku `self` all), security group `workshop_security` ning subnetid `10.1.101.0/24` ja `10.1.102.0/24`
-- SSH võtmepaar projekti juurkaustas:
-  - `siimaarmaa.pem` (privaatne võti)
-  - `siimaarmaa.pem.pub` (avalik võti)
+- Terraform and AWS access (access key / secret key as environment variables)
+- Access to the S3 bucket `xa-online-2021-march` (state)
+- Existing in AWS: AMI `devops-ubuntu-18-04-x64*` (owner `self`), security group `workshop_security`, and subnets `10.1.101.0/24` and `10.1.102.0/24`
+- SSH key pair in the project root directory:
+  - `siimaarmaa.pem` (private key)
+  - `siimaarmaa.pem.pub` (public key)
 
-> **Hoiatus:** privaatset võtit (`*.pem`) ei tohi kunagi Giti panna. `.gitignore` blokeerib `*.pem`, aga juba commit'itud faili see ei eemalda. Kui võti on kunagi repos olnud, loe see lekkinuks, genereeri uus ja eemalda vana Giti ajaloost.
+> **Warning:** never commit the private key (`*.pem`) to Git. `.gitignore` blocks `*.pem`, but it does not remove a file that was already committed. If the key has ever been in the repository, treat it as leaked, generate a new one and remove the old one from the Git history.
 
-## Kasutamine
+## Usage
 
 ```bash
 terraform init
@@ -49,27 +49,27 @@ terraform plan
 terraform apply
 ```
 
-Hävitamiseks:
+To destroy everything:
 
 ```bash
 terraform destroy
 ```
 
-Klastri serverite arvu saab muuta:
+The number of cluster servers can be changed:
 
 ```bash
 terraform apply -var="node_count=4"
 ```
 
-## Outputid
+## Outputs
 
-| Nimi | Tähendus |
+| Name | Meaning |
 |---|---|
-| `ami_id` | Kasutatud AMI ID |
-| `ip` | Eraldiseisva serveri avalik IP |
-| `lb_dns` | Load balanceri DNS-nimi (port 9200) |
+| `ami_id` | ID of the AMI used |
+| `ip` | Public IP of the standalone server |
+| `lb_dns` | DNS name of the load balancer (port 9200) |
 
-Elasticsearch'i kontroll pärast käivitamist:
+Check Elasticsearch after startup:
 
 ```bash
 curl http://<lb_dns>:9200
@@ -77,9 +77,9 @@ curl http://<lb_dns>:9200
 
 ## CI/CD
 
-GitLab pipeline (`.gitlab-ci.yml`) käivitab `terraform init` ja `terraform apply -auto-approve` etapis `deploy`. Pipeline kasutab image'it `registry.gitlab.com/xa-online-2021-march/builder:latest`.
+The GitLab pipeline (`.gitlab-ci.yml`) runs `terraform init` and `terraform apply -auto-approve` in the `deploy` stage. The pipeline uses the image `registry.gitlab.com/xa-online-2021-march/builder:latest`.
 
-## Teada piirangud
+## Known limitations
 
-- Elasticsearch kuulab vaikimisi ainult `localhost`'i ega ole seadistatud klastrina, seega load balanceri health check ei pruugi läbi minna.
-- Serverite loomisel kasutatakse SSH-ühendust, mistõttu privaatne võti peab apply ajal failina olemas olema.
+- By default Elasticsearch listens only on `localhost` and is not configured as a cluster, so the load balancer health checks may fail.
+- Provisioning uses an SSH connection, so the private key file must exist at apply time.
